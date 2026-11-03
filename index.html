@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренажёр по экологии</title>
+<meta name="description" content="Бесплатный тренажёр для подготовки к тестированию i-exam по экологии: 106 вопросов, пояснения, работа над ошибками и экзамен с таймером.">
+<meta name="theme-color" content="#ECF0ED" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1412" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Тренажёр по экологии">
+<meta property="og:description" content="Подготовка к тестированию i-exam: тренировка с пояснениями, работа над ошибками и экзамен с таймером.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231C5B71'/%3E%3Cpath d='M46 16C28 16 18 26 18 40c0 3 1 6 2 8 4-12 12-19 22-22-9 5-15 12-18 23 2 1 4 1 6 1 14 0 20-12 16-34z' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column like an exam booklet. Home: progress → modes → topic tree in the i-exam "Раздел / Тема" form. Quiz: one task card with a sticky answer bar. */
+:root{
+  --bg:#ECF0ED;
+  --surface:#FFFFFF;
+  --sunk:#E1E8E3;
+  --ink:#14201A;
+  --muted:#53635B;
+  --line:#CDD8D1;
+  --accent:#1C5B71;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#D6E6EC;
+  --ok:#1C7244;
+  --on-ok:#FFFFFF;
+  --ok-soft:#DAEEE1;
+  --bad:#AE3629;
+  --on-bad:#FFFFFF;
+  --bad-soft:#F6DED9;
+  --shadow:0 1px 2px rgba(20,32,26,.10);
+  --font-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --font-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1412; --surface:#151E1B; --sunk:#1C2723; --ink:#E3EBE7; --muted:#93A49C; --line:#2B3934;
+    --accent:#80C2D8; --accent-ink:#0A1A20; --accent-soft:#183039;
+    --ok:#62C98E; --on-ok:#0B1F13; --ok-soft:#14301F; --bad:#EF8272; --on-bad:#2A0E0A; --bad-soft:#3A1C18;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1412; --surface:#151E1B; --sunk:#1C2723; --ink:#E3EBE7; --muted:#93A49C; --line:#2B3934;
+  --accent:#80C2D8; --accent-ink:#0A1A20; --accent-soft:#183039;
+  --ok:#62C98E; --on-ok:#0B1F13; --ok-soft:#14301F; --bad:#EF8272; --on-bad:#2A0E0A; --bad-soft:#3A1C18;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:44rem;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 40px}
+.eyebrow{font-family:var(--font-mono);font-size:.7rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.section-title{font-size:1.05rem;font-weight:600}
+
+/* ---------- home ---------- */
+.home{display:grid;gap:28px}
+.masthead{display:grid;gap:10px;padding-top:4px}
+.masthead h1{font-family:var(--font-display);font-weight:700;font-size:clamp(1.6rem,6.4vw,2.4rem);line-height:1.12;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:36rem}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.summary>div{padding:14px 16px;display:grid;gap:2px;min-width:0}
+.summary>div+div{border-left:1px solid var(--line)}
+.summary .k{font-size:.8rem;color:var(--muted)}
+.summary .v{font-family:var(--font-display);font-weight:500;font-size:1.4rem;line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap}
+.summary .v small{font-family:var(--font-body);font-size:.85rem;font-weight:400;color:var(--muted);margin-left:3px}
+.modes{display:grid;gap:12px}
+.mode{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.mode-main{flex:1 1 15rem;min-width:0;display:grid;gap:4px}
+.mode h3{font-size:1.05rem;font-weight:600}
+.mode p{color:var(--muted);font-size:.92rem}
+.mode-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:2px;background:var(--sunk)}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-size:.88rem;color:var(--muted);cursor:pointer;font-variant-numeric:tabular-nums}
+.seg button[aria-checked="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:10px 18px;border-radius:10px;border:1px solid transparent;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08)}
+.btn.ghost{background:var(--surface);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:4px 2px;color:var(--accent);font-size:.9rem;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.link.danger{color:var(--bad)}
+.notice{font-size:.9rem;color:var(--bad)}
+
+.topics{display:grid;gap:10px}
+.topics-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.topics-actions{display:flex;gap:12px}
+.tree,.tree ul{list-style:none;margin:0;padding:0}
+.tree{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tree>li+li{border-top:1px solid var(--line)}
+.tree ul{padding-bottom:8px}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 16px;cursor:pointer}
+.sec-row{padding-block:12px;font-weight:600}
+.tree ul .row{padding-left:48px}
+.row input{width:18px;height:18px;margin:0;accent-color:var(--accent);cursor:pointer}
+.row .name{min-width:0;overflow-wrap:anywhere}
+.row:hover .name{color:var(--accent)}
+.tag{font-family:var(--font-mono);font-size:.66rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-right:6px}
+.stat{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.meter{width:44px;height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.soon .row{cursor:default;color:var(--muted)}
+.soon .row:hover .name{color:var(--muted)}
+.soon .box{width:16px;height:16px;border:1.5px dashed var(--line);border-radius:4px;justify-self:center}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;font-size:.88rem;color:var(--muted)}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;gap:14px;padding-block:0 0}
+.qbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:grid;gap:10px;padding-block:14px 8px}
+.qbar-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.qbar-right{display:flex;align-items:center;gap:10px}
+.count{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.timer{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums;padding:3px 8px;border-radius:6px;background:var(--sunk)}
+.timer.low{background:var(--bad-soft);color:var(--bad)}
+.progress{height:4px;border-radius:2px;background:var(--sunk);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .25s ease}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:16px;min-width:0}
+.q-meta{display:grid;gap:6px}
+.hint{font-size:.85rem;font-weight:600;color:var(--accent)}
+.q-text{font-size:1.16rem;font-weight:500;line-height:1.42;text-wrap:pretty}
+.opts{display:grid;gap:8px}
+.opt{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:12px 14px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:11px;cursor:pointer;transition:border-color .15s,background-color .15s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.is-chosen{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt-text{min-width:0;overflow-wrap:anywhere}
+.mark{width:20px;height:20px;border:2px solid var(--muted);border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:700;line-height:1}
+.opt-many .mark{border-radius:5px}
+.opt.is-chosen .mark{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.opt-one.is-chosen .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent-ink)}
+.opt-many.is-chosen .mark::after{content:"✓"}
+.opt.is-correct{border-color:var(--ok);background:var(--ok-soft);box-shadow:inset 0 0 0 1px var(--ok)}
+.opt.is-correct .mark{border-color:var(--ok);background:var(--ok);color:var(--on-ok)}
+.opt.is-correct .mark::after{content:"✓";width:auto;height:auto;border-radius:0;background:none}
+.opt.is-missed{background:var(--surface);border-style:dashed}
+.opt.is-wrong{border-color:var(--bad);background:var(--bad-soft);box-shadow:inset 0 0 0 1px var(--bad)}
+.opt.is-wrong .mark{border-color:var(--bad);background:var(--bad);color:var(--on-bad)}
+.opt.is-wrong .mark::after{content:"✕";width:auto;height:auto;border-radius:0;background:none}
+.opt.is-dim{opacity:.6}
+.miss-tag{font-size:.72rem;font-weight:600;color:var(--ok);white-space:nowrap}
+kbd{font-family:var(--font-mono);font-size:.68rem;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.opt:disabled kbd{visibility:hidden}
+@media (hover:none){kbd,.keys{display:none}}
+
+.m-legend{list-style:none;margin:0;padding:12px 14px;display:grid;gap:8px;background:var(--sunk);border-radius:11px}
+.m-legend li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px}
+.m-legend b{font-family:var(--font-mono);font-weight:600;color:var(--accent)}
+.m-rows{display:grid;gap:10px}
+.m-row{display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:11px}
+.m-row.is-correct{border-color:var(--ok);background:var(--ok-soft)}
+.m-row.is-wrong{border-color:var(--bad);background:var(--bad-soft)}
+.m-left{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;font-weight:500}
+.num{font-family:var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding-left:30px}
+.chip{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-family:var(--font-mono);font-weight:600;cursor:pointer}
+.chip:hover:not(:disabled){border-color:var(--accent)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip:disabled{cursor:default}
+.chip:disabled:not(.right):not(.bad){opacity:.4}
+.chip.right{background:var(--ok);border-color:var(--ok);color:var(--on-ok)}
+.chip.bad{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
+
+.ord-label{font-size:.8rem;font-weight:600;color:var(--muted)}
+.ord-seq{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.slot{border:1px solid var(--line);border-radius:11px;min-height:48px}
+.slot.empty{border-style:dashed;display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:center;padding:10px 14px;color:var(--muted);font-size:.88rem}
+.slot button{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:11px 14px;text-align:left;background:transparent;border:0;border-radius:11px;cursor:pointer}
+.slot button:disabled{cursor:default}
+.slot .x{color:var(--muted);font-size:1.1rem;line-height:1}
+.slot.is-correct{border-color:var(--ok);background:var(--ok-soft)}
+.slot.is-wrong{border-color:var(--bad);background:var(--bad-soft)}
+.ord-pool{display:grid;gap:8px}
+.ord-pool .opt{grid-template-columns:minmax(0,1fr) auto}
+
+.fb{display:grid;gap:8px;padding:14px 16px;border-radius:12px}
+.fb.ok{background:var(--ok-soft)}
+.fb.bad{background:var(--bad-soft)}
+.fb-head{font-weight:700}
+.fb.ok .fb-head{color:var(--ok)}
+.fb.bad .fb-head{color:var(--bad)}
+.fb ol{margin:0;padding-left:1.3rem}
+.keys{text-align:center}
+.actions{position:sticky;bottom:0;z-index:4;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;padding-block:14px max(14px,env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 72%,transparent)}
+@media (max-width:520px){.actions .btn{flex:1 1 auto}}
+
+/* ---------- result ---------- */
+.result{display:grid;gap:28px}
+.res-head{display:grid;gap:6px}
+.score{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.score .big{font-family:var(--font-display);font-weight:700;font-size:3.2rem;line-height:1;font-variant-numeric:tabular-nums}
+.score .of{font-size:1.1rem;color:var(--muted)}
+.block{display:grid;gap:10px}
+.t-rows{display:grid;gap:12px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.t-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 40px;gap:12px;align-items:center;font-size:.92rem}
+.t-row .name{min-width:0}
+.t-row .bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.t-row .bar i{display:block;height:100%;background:var(--ok)}
+.t-row .bar i.low{background:var(--bad)}
+.t-row .n{font-family:var(--font-mono);font-size:.8rem;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.errs{display:grid;gap:8px}
+.err{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.err summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;font-weight:500;cursor:pointer;list-style:none}
+.err summary::-webkit-details-marker{display:none}
+.err summary::after{content:"+";font-family:var(--font-mono);color:var(--muted)}
+.err[open] summary::after{content:"−"}
+.err-body{display:grid;gap:12px;margin-top:12px;font-size:.94rem}
+.lbl{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.err-body ul,.err-body ol{margin:4px 0 0;padding-left:1.2rem}
+.yours{color:var(--bad)}
+.right-ans{color:var(--ok)}
+@media (max-width:420px){
+  .summary .v{font-size:1.15rem}
+  .summary>div{padding:12px}
+  .tree ul .row{padding-left:40px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<main id="home" class="wrap home"></main>
+<main id="quiz" class="wrap quiz" hidden></main>
+<main id="result" class="wrap result" hidden></main>
+
+<script>
+/* ===== Структура курса (как в дереве тем i-exam) ===== */
+const SECTIONS = [
+  {id:'s1', name:'Биосфера', topics:[['b1','Экология как наука'],['b2','Понятие биосферы, её структура'],['b3','Живое вещество биосферы, его функции'],['b4','Круговороты веществ в биосфере']]},
+  {id:'s2', name:'Экосистемы', topics:[]},
+  {id:'s3', name:'Организм и среда', topics:[['o1','Основные среды жизни'],['o2','Экологические факторы среды'],['o3','Закономерности действия экологических факторов на живые организмы'],['o4','Адаптация организмов к изменениям экологических факторов']]},
+  {id:'s4', name:'Глобальные экологические проблемы', topics:[['g1','«Парниковый эффект»'],['g2','«Озоновые дыры»'],['g3','Проблема кислотных осадков'],['g4','Энергетическая проблема'],['g5','Проблемы народонаселения и продовольствия'],['g6','Сокращение биоразнообразия']]},
+  {id:'s5', name:'Антропогенное воздействие на окружающую среду', topics:[['a1','Источники и виды антропогенных воздействий на окружающую среду'],['a2','Антропогенное воздействие на атмосферу'],['a3','Антропогенное воздействие на гидросферу'],['a4','Антропогенное изменение литосферы'],['a5','Отходы и их влияние на окружающую среду'],['a6','Физическое загрязнение окружающей среды']]},
+  {id:'s6', name:'Рациональное природопользование и охрана окружающей среды', topics:[]},
+  {id:'s7', name:'Социально-экономические аспекты экологии', topics:[]},
+  {id:'s8', name:'Кейс-задания', topics:[]},
+];
+
+/* ===== Банк вопросов =====
+   k: one — один ответ (верный вариант всегда первый в списке, порядок перемешивается при показе)
+      many — несколько ответов (a — индексы верных)
+      match — соответствие (p — пары, x — лишние варианты справа)
+      order — последовательность (o — в правильном порядке) */
+const B = {
+b1:[
+ {k:'one', q:'Термин «экология» впервые ввёл в науку', o:['Э. Геккель','В. И. Вернадский','Ч. Дарвин','А. Тенсли'], e:'Эрнст Геккель предложил термин в 1866 г. в труде «Общая морфология организмов». Греч. oikos — дом, жилище, logos — учение.'},
+ {k:'one', q:'Экология — это наука о', o:['взаимоотношениях организмов между собой и с окружающей средой','строении и функциях клеток живых организмов','закономерностях наследственности и изменчивости','историческом развитии органического мира'], e:'Экология изучает связи организмов, популяций и сообществ друг с другом и со средой обитания.'},
+ {k:'match', q:'Установите соответствие между разделом экологии и объектом его изучения', p:[['Аутэкология','отдельный организм (вид) и его связи со средой'],['Демэкология','популяции'],['Синэкология','сообщества и экосистемы']], x:['строение и функции клетки'], e:'Аутэкология изучает особь и вид, демэкология — популяции, синэкология — сообщества (биоценозы) и экосистемы. Клетку изучает цитология.'},
+ {k:'match', q:'Установите соответствие между учёным и понятием, которое он ввёл', p:[['К. Мёбиус','биоценоз'],['Э. Зюсс','биосфера'],['А. Тенсли','экосистема'],['В. Н. Сукачёв','биогеоценоз']], x:['ноосфера'], e:'Мёбиус — биоценоз (1877), Зюсс — биосфера (1875), Тенсли — экосистема (1935), Сукачёв — биогеоценоз (1940). Понятие ноосферы развивали Э. Леруа, П. Тейяр де Шарден и В. И. Вернадский.'},
+ {k:'order', q:'Расположите термины в порядке их появления в науке, начиная с самого раннего', o:['экология','биосфера','биоценоз','экосистема','биогеоценоз'], e:'Экология — 1866 (Геккель), биосфера — 1875 (Зюсс), биоценоз — 1877 (Мёбиус), экосистема — 1935 (Тенсли), биогеоценоз — 1940 (Сукачёв).'},
+ {k:'many', q:'Основными методами экологических исследований являются', o:['полевые наблюдения','эксперимент','математическое моделирование','генеалогический метод','гибридологический анализ'], a:[0,1,2], e:'Экология опирается на наблюдения, полевые и лабораторные эксперименты и моделирование. Генеалогический метод и гибридологический анализ — методы генетики.'},
+ {k:'one', q:'Уровень организации живой материи, который НЕ является предметом изучения экологии', o:['молекулярный','организменный','популяционно-видовой','биосферный'], e:'Экология изучает уровни от организма и выше: организменный, популяционно-видовой, экосистемный и биосферный. Молекулярный уровень изучают биохимия и молекулярная биология.'},
+ {k:'one', q:'Раздел экологии, изучающий взаимодействие человеческого общества с окружающей средой', o:['социальная экология','аутэкология','палеоэкология','синэкология'], e:'Социальная экология исследует связи общества и природы: влияние человека на среду и среды на человека.'},
+],
+b2:[
+ {k:'one', q:'Создателем целостного учения о биосфере является', o:['В. И. Вернадский','Э. Зюсс','Ж.-Б. Ламарк','В. Н. Сукачёв'], e:'Термин «биосфера» ввёл австрийский геолог Э. Зюсс в 1875 г., а учение о биосфере создал В. И. Вернадский (книга «Биосфера», 1926).'},
+ {k:'one', q:'Верхняя граница биосферы в атмосфере определяется', o:['озоновым слоем','верхней границей тропосферы','высотой облаков','предельной высотой полёта птиц'], e:'Выше озонового слоя (около 20–25 км) жёсткое ультрафиолетовое излучение губительно для живого, поэтому там проходит верхняя граница биосферы.'},
+ {k:'one', q:'Распространение жизни вглубь литосферы ограничивает прежде всего', o:['высокая температура недр','отсутствие света','отсутствие кислорода','недостаток воды'], e:'С глубиной температура растёт примерно на 3 °C на каждые 100 м. На глубине 3–4 км она достигает 100 °C, и жизнь, даже бактериальная, становится невозможной. Отсутствие света и кислорода не мешает хемосинтезирующим и анаэробным бактериям.'},
+ {k:'many', q:'В состав биосферы входят', o:['нижняя часть атмосферы','вся гидросфера','верхняя часть литосферы','мантия Земли','ионосфера'], a:[0,1,2], e:'Биосфера охватывает нижнюю часть атмосферы (до озонового слоя), всю гидросферу и верхнюю часть литосферы. Мантия и ионосфера лежат за её пределами.'},
+ {k:'match', q:'Установите соответствие между типом вещества биосферы (по В. И. Вернадскому) и примером', p:[['Живое','растения, животные, микроорганизмы'],['Биогенное','каменный уголь, нефть, известняк'],['Косное','базальт, гранит'],['Биокосное','почва, ил']], e:'Живое вещество — совокупность организмов. Биогенное создано организмами, косное образовано без участия жизни, биокосное создаётся совместно живыми организмами и неживыми процессами.'},
+ {k:'one', q:'Ноосфера — это', o:['стадия развития биосферы, когда разумная деятельность человека становится главным фактором её развития','совокупность всех живых организмов планеты','газовая оболочка Земли','часть биосферы, полностью изменённая промышленностью'], e:'Ноосфера — «сфера разума». В. И. Вернадский рассматривал её как закономерный этап эволюции биосферы под влиянием научной мысли и труда человека.'},
+ {k:'one', q:'Наибольшая концентрация жизни в биосфере наблюдается', o:['на границах раздела оболочек Земли','в глубинах Мирового океана','в верхних слоях атмосферы','в толще земной коры'], e:'«Плёнки жизни» сосредоточены там, где соприкасаются атмосфера, гидросфера и литосфера: поверхность суши, верхний освещённый слой океана, прибрежья.'},
+ {k:'one', q:'Нижняя граница биосферы в гидросфере проходит', o:['по дну Мирового океана, включая глубоководные впадины','на глубине 200 м, где заканчивается проникновение света','на глубине около 1 км','по границе термоклина'], e:'Жизнь обнаружена на всех глубинах океана, вплоть до дна Марианской впадины (около 11 км), поэтому гидросфера входит в биосферу целиком.'},
+],
+b4:[
+ {k:'one', q:'Основным источником энергии для биологического круговорота веществ служит', o:['солнечная энергия','внутреннее тепло Земли','энергия радиоактивного распада','энергия морских приливов'], e:'Биологический (малый) круговорот поддерживается солнечной энергией, которую улавливают фотосинтезирующие организмы.'},
+ {k:'one', q:'Атмосферный азот в доступную для растений форму переводят', o:['азотфиксирующие бактерии','денитрифицирующие бактерии','грибы-сапротрофы','гнилостные бактерии'], e:'Азотфиксаторы (клубеньковые бактерии бобовых, свободноживущие бактерии, цианобактерии) связывают N₂ в аммиак. Денитрификаторы, наоборот, возвращают азот в атмосферу.'},
+ {k:'match', q:'Установите соответствие между процессом круговорота азота и его сущностью', p:[['Азотфиксация','связывание атмосферного N₂ в аммиак'],['Аммонификация','разложение органических остатков с образованием аммиака'],['Нитрификация','окисление аммиака до нитритов и нитратов'],['Денитрификация','восстановление нитратов до молекулярного азота']], e:'Все четыре этапа выполняют микроорганизмы: азотфиксаторы, гнилостные бактерии и грибы, нитрифицирующие и денитрифицирующие бактерии.'},
+ {k:'order', q:'Установите последовательность превращений азота, начиная с атмосферного', o:['связывание N₂ клубеньковыми бактериями','включение азота в белки растений','разложение мёртвой органики с образованием аммиака','окисление аммиака до нитратов','восстановление нитратов до N₂ и возврат в атмосферу'], e:'Азотфиксация → усвоение растениями → аммонификация → нитрификация → денитрификация. Круг замыкается возвратом N₂ в атмосферу.'},
+ {k:'one', q:'Круговорот какого элемента относится к осадочному типу и почти не имеет газовой фазы в атмосфере?', o:['фосфора','углерода','азота','кислорода'], e:'Главный резервуар фосфора — горные породы и донные отложения. Устойчивых газообразных соединений он не образует, поэтому его круговорот незамкнут и медленен.'},
+ {k:'many', q:'К процессам, возвращающим углерод в атмосферу в виде CO₂, относятся', o:['дыхание организмов','сжигание ископаемого топлива','разложение органики редуцентами','фотосинтез','образование известняков'], a:[0,1,2], e:'Дыхание, горение и разложение органики выделяют CO₂. Фотосинтез и образование карбонатных пород, наоборот, изымают углерод из атмосферы.'},
+ {k:'one', q:'Большая часть испарения воды на Земле приходится на', o:['поверхность Мирового океана','поверхность суши','транспирацию растений','поверхность ледников'], e:'Около 86 % испарения происходит с поверхности океана. Часть этой влаги переносится на сушу и выпадает в виде осадков.'},
+ {k:'one', q:'Основным источником свободного кислорода атмосферы является', o:['фотосинтез','извержения вулканов','разложение органических веществ','дыхание организмов'], e:'Почти весь свободный O₂ атмосферы образован фотосинтезирующими организмами: растениями, водорослями, цианобактериями.'},
+ {k:'one', q:'Роль редуцентов в круговороте веществ состоит в том, что они', o:['разлагают мёртвое органическое вещество до минеральных соединений','синтезируют органические вещества из неорганических','переносят вещества по пищевым цепям, поедая растения','связывают солнечную энергию'], e:'Редуценты (бактерии, грибы) минерализуют органику и возвращают элементы в почву и воду, где их снова усваивают продуценты.'},
+],
+o2:[
+ {k:'match', q:'Установите соответствие между экологическим фактором и группой, к которой он относится', p:[['Солёность воды','абиотический'],['Конкуренция между особями','биотический'],['Вырубка леса','антропогенный']], x:['генетический'], e:'Абиотические факторы — свойства неживой природы, биотические — влияние организмов друг на друга, антропогенные — деятельность человека.'},
+ {k:'many', q:'К абиотическим факторам относятся', o:['освещённость','температура воздуха','солёность воды','хищничество','распашка земель'], a:[0,1,2], e:'Освещённость, температура и солёность — физико-химические условия среды. Хищничество — биотический фактор, распашка — антропогенный.'},
+ {k:'one', q:'Тип взаимоотношений, при котором один вид получает пользу, а другому это безразлично', o:['комменсализм','мутуализм','аменсализм','нейтрализм'], e:'Комменсализм (+/0): например, рыба-прилипала и акула. Мутуализм (+/+), аменсализм (−/0), нейтрализм (0/0).'},
+ {k:'match', q:'Установите соответствие между типом биотических отношений и примером', p:[['Мутуализм','микориза гриба и корней дерева'],['Паразитизм','бычий цепень и человек'],['Хищничество','волк и заяц'],['Комменсализм','рыба-прилипала и акула']], e:'При мутуализме выигрывают оба вида, при паразитизме и хищничестве один живёт за счёт другого, при комменсализме один получает пользу без вреда для партнёра.'},
+ {k:'one', q:'Фактор, значение которого наиболее отклоняется от оптимума и ограничивает существование вида, называют', o:['лимитирующим','оптимальным','сигнальным','периодическим'], e:'По закону минимума Либиха выносливость организма определяется самым слабым звеном — фактором, который находится в недостатке или избытке.'},
+ {k:'one', q:'К первичным периодическим факторам (по А. С. Мончадскому) относится', o:['суточная смена освещённости','количество осадков','вспышка численности хищника','извержение вулкана'], e:'Первичные периодические факторы связаны с вращением Земли: суточные и сезонные изменения света и температуры, приливы. Осадки — вторичный периодический фактор, извержение — непериодический.'},
+ {k:'one', q:'Организмы, способные переносить широкие колебания температуры, называют', o:['эвритермными','стенотермными','эвригалинными','стенобатными'], e:'«Эври-» — широкий диапазон выносливости, «стено-» — узкий. «-термный» относится к температуре, «-галинный» — к солёности, «-батный» — к давлению (глубине).'},
+ {k:'one', q:'Главным сигнальным фактором для сезонных изменений у растений и животных служит', o:['продолжительность светового дня','среднесуточная температура','количество осадков','влажность воздуха'], e:'Фотопериод меняется строго закономерно из года в год, поэтому служит надёжным сигналом наступления сезона. Температура и осадки могут сильно колебаться.'},
+],
+g1:[
+ {k:'one', q:'Сущность парникового эффекта состоит в том, что атмосфера', o:['пропускает солнечное излучение, но задерживает тепловое излучение земной поверхности','отражает большую часть солнечного излучения обратно в космос','поглощает ультрафиолетовое излучение Солнца','пропускает тепловое излучение Земли в космос без потерь'], e:'Коротковолновое солнечное излучение проходит к поверхности, а длинноволновое (инфракрасное) излучение нагретой Земли поглощают парниковые газы и частично возвращают вниз.'},
+ {k:'many', q:'К парниковым газам относятся', o:['углекислый газ (CO₂)','метан (CH₄)','оксид азота(I) (N₂O)','водяной пар','азот (N₂)','кислород (O₂)'], a:[0,1,2,3], e:'Парниковые газы поглощают инфракрасное излучение. N₂ и O₂, основные компоненты воздуха, к ним не относятся.'},
+ {k:'one', q:'Главным антропогенным источником углекислого газа является', o:['сжигание ископаемого топлива','выращивание риса','извержения вулканов','дыхание сельскохозяйственных животных'], e:'Сжигание угля, нефти и газа даёт основную часть антропогенных выбросов CO₂. Второй по значению источник — сведение лесов.'},
+ {k:'one', q:'Без естественного парникового эффекта средняя температура у поверхности Земли была бы около', o:['−18 °C','0 °C','+5 °C','−50 °C'], e:'Сейчас средняя температура около +15 °C. Естественный парниковый эффект повышает её примерно на 33 °C. Проблемой является его усиление деятельностью человека.'},
+ {k:'one', q:'Наибольший вклад в усиление парникового эффекта деятельностью человека вносит', o:['углекислый газ','метан','фреоны','оксид азота(I)'], e:'На CO₂ приходится около двух третей дополнительного парникового эффекта. Метан сильнее в расчёте на молекулу, но его выбрасывается гораздо меньше.'},
+ {k:'one', q:'Значительным антропогенным источником метана является', o:['животноводство','солнечная энергетика','ветровая энергетика','лесовосстановление'], e:'Метан образуется в пищеварительном тракте жвачных животных, на рисовых полях и свалках, при добыче и транспортировке газа и угля.'},
+ {k:'many', q:'Возможными последствиями усиления парникового эффекта являются', o:['таяние ледников и подъём уровня Мирового океана','смещение границ природных зон к полюсам','учащение засух, ураганов и других экстремальных явлений','расширение площади полярных льдов','снижение средней температуры планеты'], a:[0,1,2], e:'Глобальное потепление ведёт к таянию льдов, подъёму уровня океана, сдвигу природных зон и росту числа погодных аномалий.'},
+ {k:'one', q:'Международное соглашение, впервые установившее обязательства развитых стран по сокращению выбросов парниковых газов', o:['Киотский протокол','Монреальский протокол','Базельская конвенция','Рамсарская конвенция'], e:'Киотский протокол (1997) дополнил Рамочную конвенцию ООН об изменении климата (1992), в 2015 г. принято Парижское соглашение. Монреальский протокол касается озонового слоя, Базельская конвенция — опасных отходов, Рамсарская — водно-болотных угодий.'},
+],
+g2:[
+ {k:'one', q:'Озоновый слой расположен преимущественно в', o:['стратосфере','тропосфере','мезосфере','термосфере'], e:'Максимальная концентрация озона наблюдается в стратосфере на высоте около 20–25 км.'},
+ {k:'one', q:'Главная экологическая функция озонового слоя', o:['поглощение жёсткого ультрафиолетового излучения Солнца','задержка теплового излучения Земли','защита от метеоритов','образование облаков и осадков'], e:'Озон поглощает жёсткую часть ультрафиолета, губительную для живых клеток. Без озонового слоя жизнь на суше была бы невозможна.'},
+ {k:'one', q:'Основные антропогенные вещества, разрушающие озоновый слой', o:['хлорфторуглероды (фреоны)','углекислый газ','диоксид серы','водяной пар'], e:'Фреоны использовались в холодильниках, кондиционерах, аэрозольных баллончиках. В стратосфере они распадаются с выделением хлора, который разрушает озон.'},
+ {k:'order', q:'Установите последовательность процессов, ведущих к разрушению озонового слоя', o:['выброс фреонов из холодильников и аэрозолей','перенос фреонов в стратосферу','распад фреонов под действием ультрафиолета с выделением хлора','реакция хлора с озоном','истончение озонового слоя и рост ультрафиолета у поверхности'], e:'Фреоны устойчивы и годами поднимаются в стратосферу. Там ультрафиолет высвобождает атомы хлора, которые запускают цепное разрушение озона.'},
+ {k:'one', q:'Один атом хлора, высвободившийся из фреона, способен разрушить', o:['до 100 000 молекул озона','только одну молекулу озона','около 10 молекул озона','до 100 молекул озона'], e:'Хлор действует как катализатор: после реакции Cl + O₃ → ClO + O₂ он высвобождается снова и вступает в новую реакцию.'},
+ {k:'one', q:'Самая крупная озоновая дыра регулярно образуется над', o:['Антарктидой','Европой','Северной Америкой','экватором'], e:'Озоновая дыра над Антарктидой появляется каждую весну Южного полушария (сентябрь — октябрь). Этому способствуют полярный вихрь и полярные стратосферные облака.'},
+ {k:'many', q:'Последствиями истончения озонового слоя являются', o:['рост заболеваемости раком кожи','рост заболеваемости катарактой','угнетение фитопланктона и снижение урожайности','повышение уровня Мирового океана','выпадение кислотных дождей'], a:[0,1,2], e:'Усиление ультрафиолета повреждает ДНК, глаза и иммунитет, угнетает фотосинтез. Подъём уровня океана связан с парниковым эффектом, кислотные дожди — с оксидами серы и азота.'},
+ {k:'one', q:'Международный договор, ограничивший производство озоноразрушающих веществ', o:['Монреальский протокол','Киотский протокол','Парижское соглашение','Стокгольмская конвенция'], e:'Монреальский протокол (1987) принят в развитие Венской конвенции об охране озонового слоя (1985). Благодаря ему концентрация фреонов в атмосфере снижается.'},
+],
+g3:[
+ {k:'one', q:'Кислотными считают осадки, pH которых ниже', o:['5,6','7,0','3,0','8,5'], e:'Чистая дождевая вода слабокислая (pH около 5,6) из-за растворённого CO₂. Более кислые осадки образуются при растворении оксидов серы и азота.'},
+ {k:'many', q:'Основными газами, вызывающими кислотные осадки, являются', o:['диоксид серы (SO₂)','оксиды азота (NOₓ)','метан (CH₄)','фреоны','аргон'], a:[0,1], e:'SO₂ и оксиды азота в атмосфере превращаются в серную и азотную кислоты, которые выпадают с дождём и снегом.'},
+ {k:'one', q:'Главным антропогенным источником диоксида серы являются', o:['тепловые электростанции, сжигающие уголь и мазут','гидроэлектростанции','рисовые поля','ветровые электростанции'], e:'Уголь и мазут содержат серу, при сжигании она превращается в SO₂. Крупный источник также — выплавка цветных металлов из сернистых руд.'},
+ {k:'match', q:'Установите соответствие между загрязняющим газом и кислотой, которая из него образуется в атмосфере', p:[['Диоксид серы (SO₂)','серная кислота'],['Диоксид азота (NO₂)','азотная кислота'],['Хлороводород (HCl)','соляная кислота']], x:['уксусная кислота'], e:'SO₂ окисляется и с водой даёт серную кислоту, NO₂ — азотную, HCl растворяется в каплях воды с образованием соляной кислоты.'},
+ {k:'many', q:'Последствиями кислотных осадков являются', o:['закисление озёр и гибель рыбы','повреждение и гибель хвойных лесов','разрушение памятников из мрамора и известняка','повышение плодородия почв','восстановление озонового слоя'], a:[0,1,2], e:'Кислотные осадки закисляют воду и почву, вымывают питательные элементы, повышают подвижность токсичного алюминия, разрушают карбонатные материалы.'},
+ {k:'one', q:'Наиболее эффективный способ уменьшить выпадение кислотных осадков', o:['очистка дымовых газов от оксидов серы и азота','строительство более высоких дымовых труб','известкование закисленных почв и озёр','увеличение мощности электростанций'], e:'Очистка газов устраняет причину. Высокие трубы лишь переносят загрязнение дальше, а известкование борется с последствиями.'},
+ {k:'one', q:'Проблема кислотных осадков считается международной, потому что', o:['загрязнители переносятся воздушными массами на сотни и тысячи километров','кислотные осадки выпадают только над океанами','их вызывают исключительно природные процессы','они влияют лишь на страны, где расположены электростанции'], e:'Это пример трансграничного загрязнения. В 1979 г. принята Конвенция о трансграничном загрязнении воздуха на большие расстояния.'},
+ {k:'one', q:'От кислотных осадков в наибольшей степени страдают памятники и здания из', o:['мрамора и известняка','гранита','кварцита','базальта'], e:'Мрамор и известняк состоят из карбоната кальция, который реагирует с кислотами и постепенно растворяется.'},
+],
+g5:[
+ {k:'one', q:'По оценке ООН, численность населения Земли в ноябре 2022 г. достигла', o:['8 млрд человек','6 млрд человек','10 млрд человек','12 млрд человек'], e:'ООН отметила рубеж в 8 млрд 15 ноября 2022 г. 7 млрд было достигнуто в 2011 г., 6 млрд — в 1999 г.'},
+ {k:'one', q:'Резкий рост численности населения во второй половине XX века называют', o:['демографическим взрывом','демографическим переходом','урбанизацией','депопуляцией'], e:'Демографический взрыв связан с резким снижением смертности при сохранении высокой рождаемости, прежде всего в развивающихся странах.'},
+ {k:'one', q:'Согласно теории Т. Мальтуса', o:['население растёт в геометрической прогрессии, а средства существования — в арифметической','население и производство продовольствия растут одинаково','производство продовольствия всегда опережает рост населения','численность населения не зависит от количества пищи'], e:'Мальтус (1798) считал, что рост населения неизбежно обгонит производство продовольствия и приведёт к голоду и бедствиям.'},
+ {k:'order', q:'Установите последовательность стадий демографического перехода', o:['высокая рождаемость и высокая смертность, медленный рост населения','снижение смертности при высокой рождаемости, быстрый рост населения','снижение рождаемости, замедление роста населения','низкая рождаемость и низкая смертность, стабилизация численности'], e:'Модель демографического перехода описывает смену традиционного типа воспроизводства современным. Демографический взрыв приходится на вторую стадию.'},
+ {k:'one', q:'«Зелёная революция» — это', o:['повышение урожайности за счёт новых сортов, удобрений, пестицидов и орошения','переход сельского хозяйства на органические удобрения','массовое озеленение городов','отказ от выращивания зерновых в пользу овощей'], e:'«Зелёная революция» 1940–1970-х гг. связана с именем Н. Борлоуга. Она резко увеличила производство зерна, но породила экологические проблемы.'},
+ {k:'many', q:'Негативными экологическими последствиями «зелёной революции» стали', o:['загрязнение вод удобрениями и пестицидами','засоление почв при орошении','сокращение генетического разнообразия культур','увеличение лесистости','снижение потребления воды'], a:[0,1,2], e:'Интенсивное земледелие требует много воды и химикатов, ведёт к засолению и истощению почв и вытесняет местные сорта однородными высокоурожайными.'},
+ {k:'one', q:'Наиболее высокие темпы прироста населения сейчас характерны для', o:['стран Африки южнее Сахары','стран Западной Европы','Японии','Северной Америки'], e:'В странах Африки южнее Сахары рождаемость остаётся высокой. Во многих странах Европы и в Японии наблюдается естественная убыль населения.'},
+ {k:'one', q:'Максимальную численность популяции, которую среда может поддерживать длительное время без деградации, называют', o:['ёмкостью среды','биотическим потенциалом','плотностью популяции','рождаемостью'], e:'Ёмкость среды определяется доступными ресурсами. Для человечества её оценки зависят от технологий и уровня потребления.'},
+],
+g6:[
+ {k:'one', q:'Главная причина сокращения биоразнообразия в наше время', o:['разрушение и фрагментация мест обитания','естественный отбор','вулканическая деятельность','смена геологических эпох'], e:'Распашка, вырубка лесов, осушение болот и застройка лишают виды мест обитания. Это ведущий фактор утраты биоразнообразия.'},
+ {k:'many', q:'К причинам сокращения биоразнообразия относятся', o:['вырубка лесов и распашка земель','перепромысел и браконьерство','загрязнение окружающей среды','вселение чужеродных видов','создание заповедников','восстановление водно-болотных угодий'], a:[0,1,2,3], e:'Утрата мест обитания, перепромысел, загрязнение, инвазии и изменение климата — основные угрозы. Заповедники и восстановление угодий, наоборот, сохраняют виды.'},
+ {k:'one', q:'Конвенция о биологическом разнообразии была принята', o:['в 1992 г. в Рио-де-Жанейро','в 1972 г. в Стокгольме','в 1997 г. в Киото','в 1987 г. в Монреале'], e:'Конвенция подписана на конференции ООН по окружающей среде и развитию в Рио-де-Жанейро в 1992 г.'},
+ {k:'one', q:'Документ, содержащий сведения о редких и находящихся под угрозой исчезновения видах растений и животных', o:['Красная книга','Зелёная книга','Белая книга','Чёрная книга'], e:'Международную Красную книгу ведёт МСОП, в России есть Красная книга РФ и красные книги регионов. В Чёрную книгу заносят уже вымершие виды, в Зелёную — редкие растительные сообщества.'},
+ {k:'match', q:'Установите соответствие между типом особо охраняемой природной территории и её особенностью', p:[['Заповедник','полностью изъят из хозяйственного использования'],['Национальный парк','охрана природы сочетается с регулируемым туризмом'],['Заказник','охраняются отдельные виды или компоненты природы, хозяйственная деятельность ограничена'],['Памятник природы','отдельный уникальный природный объект']], e:'Заповедник — самая строгая форма охраны. В национальных парках выделяют зоны для отдыха, в заказниках запрещены лишь отдельные виды деятельности.'},
+ {k:'one', q:'Какой из перечисленных видов был полностью истреблён человеком?', o:['стеллерова корова','зубр','амурский тигр','сайгак'], e:'Стеллерову корову истребили к 1768 г., всего через 27 лет после открытия. Зубр сохранился в зоопарках и был восстановлен в природе.'},
+ {k:'one', q:'Выделяют три уровня биологического разнообразия: генетическое, видовое и', o:['экосистемное','клеточное','молекулярное','организменное'], e:'Генетическое разнообразие — внутри вида, видовое — число видов, экосистемное — разнообразие сообществ и местообитаний.'},
+ {k:'one', q:'Наибольшим видовым разнообразием на суше отличаются', o:['влажные тропические леса','таёжные леса','тундры','степи'], e:'Влажные тропические леса занимают около 6 % суши, но в них обитает более половины всех видов наземных организмов.'},
+],
+a1:[
+ {k:'one', q:'Загрязнение окружающей среды — это', o:['поступление в среду новых, не свойственных ей веществ или превышение естественного уровня существующих','любое изменение ландшафта человеком','естественный процесс разрушения горных пород','использование природных ресурсов'], e:'Загрязнителем может быть вещество, энергия (тепло, шум, излучение) или организмы, если их количество превышает естественный уровень.'},
+ {k:'match', q:'Установите соответствие между видом загрязнения (по Н. Ф. Реймерсу) и его сущностью', p:[['Ингредиентное','поступление чуждых среде веществ'],['Параметрическое','изменение физических параметров среды: тепло, шум, излучение'],['Биоценотическое','нарушение состава и структуры сообществ'],['Стациально-деструкционное','разрушение местообитаний']], e:'Выбросы SO₂ — ингредиентное загрязнение, шум аэропорта — параметрическое, перепромысел рыбы — биоценотическое, осушение болот и застройка — стациально-деструкционное.'},
+ {k:'one', q:'Загрязнение, связанное с изменением физических свойств среды (тепло, шум, свет, радиация), называют', o:['параметрическим','ингредиентным','биоценотическим','стациально-деструкционным'], e:'Параметрическое загрязнение меняет качественные параметры среды, не добавляя в неё новых веществ.'},
+ {k:'match', q:'Установите соответствие между видом загрязнения и примером', p:[['Химическое','выбросы оксидов серы электростанцией'],['Физическое','шум вблизи аэропорта'],['Биологическое','попадание болезнетворных бактерий со сточными водами'],['Механическое','засорение территории строительным мусором']], e:'Химическое загрязнение — вещества, физическое — энергия, биологическое — организмы, механическое — инертные твёрдые отходы.'},
+ {k:'many', q:'К естественным (природным) источникам загрязнения относятся', o:['извержения вулканов','пылевые бури','лесные пожары от молний','выхлопные газы автомобилей','сточные воды предприятий'], a:[0,1,2], e:'Природные источники действуют без участия человека. Выхлопы и промышленные стоки — антропогенные источники.'},
+ {k:'one', q:'Предельно допустимая концентрация (ПДК) — это', o:['наибольшая концентрация вещества, не оказывающая вредного влияния на здоровье человека и его потомство','средняя концентрация вещества в атмосфере города','концентрация, при которой вещество начинает ощущаться по запаху','количество вещества, которое предприятие выбрасывает за год'], e:'ПДК — основной гигиенический норматив качества воздуха, воды и почвы. Количество выбросов предприятия ограничивает другой норматив — ПДВ (предельно допустимый выброс).'},
+ {k:'one', q:'Примером косвенного воздействия человека на природу является', o:['гибель рыбы из-за «цветения» воды, вызванного смывом удобрений с полей','вырубка леса','промысловая охота','добыча песка в карьере'], e:'При косвенном воздействии вред возникает через цепочку природных процессов. Вырубка, охота и добыча — прямые воздействия.'},
+],
+a2:[
+ {k:'one', q:'Основной источник загрязнения атмосферного воздуха в крупных городах', o:['автомобильный транспорт','гидроэлектростанции','сельское хозяйство','ветровые электростанции'], e:'В крупных городах на автотранспорт приходится большая часть выбросов, причём они поступают прямо в приземный слой воздуха.'},
+ {k:'many', q:'В выхлопных газах автомобилей содержатся', o:['оксид углерода (угарный газ)','оксиды азота','углеводороды','сажа','фреоны','радон'], a:[0,1,2,3], e:'Двигатели внутреннего сгорания выбрасывают CO, NOₓ, несгоревшие углеводороды, сажу и бензапирен. Фреоны выделяются из холодильной техники, радон — из горных пород.'},
+ {k:'one', q:'Фотохимический смог (лос-анджелесского типа) образуется в результате', o:['реакций оксидов азота и углеводородов под действием солнечного излучения','смешения тумана с дымом от сжигания угля','вулканических извержений','испарения воды с поверхности водоёмов'], e:'Фотохимический смог возникает в солнечную безветренную погоду. В нём образуются озон и другие окислители, раздражающие глаза и дыхательные пути.'},
+ {k:'match', q:'Установите соответствие между типом смога и условиями его образования', p:[['Лондонский','туман в сочетании с дымом и диоксидом серы, влажная прохладная погода'],['Лос-анджелесский','солнечная погода, оксиды азота и углеводороды выхлопных газов'],['Ледяной (аляскинский)','сильный мороз, кристаллы льда и выбросы']], e:'Лондонский смог называют влажным, лос-анджелесский — фотохимическим. В декабре 1952 г. лондонский смог унёс тысячи жизней.'},
+ {k:'one', q:'Температурная инверсия способствует накоплению загрязнений в приземном воздухе, потому что', o:['слой тёплого воздуха над холодным препятствует вертикальному перемешиванию','усиливает ветер у поверхности земли','вызывает обильные осадки','повышает содержание кислорода'], e:'Обычно температура с высотой падает и тёплый воздух поднимается, унося примеси. При инверсии тёплый слой лежит сверху и работает как крышка.'},
+ {k:'one', q:'Угарный газ (CO) опасен для человека тем, что', o:['соединяется с гемоглобином и нарушает перенос кислорода','разрушает озоновый слой','вызывает кислотные дожди','накапливается в костной ткани'], e:'Сродство CO к гемоглобину примерно в 200 раз выше, чем у кислорода. Образуется карбоксигемоглобин, и ткани испытывают кислородное голодание.'},
+ {k:'one', q:'Тяжёлый металл, загрязнявший воздух городов при использовании этилированного бензина', o:['свинец','ртуть','кадмий','хром'], e:'Для повышения октанового числа в бензин добавляли тетраэтилсвинец. В России этилированный бензин запрещён с 2003 г.'},
+ {k:'one', q:'Санитарно-защитная зона — это', o:['территория между промышленным предприятием и жилой застройкой','особо охраняемая природная территория','зона отдыха в черте города','территория вокруг водозабора'], e:'Санитарно-защитная зона снижает воздействие выбросов, шума и других факторов предприятия на население. Её ширина зависит от класса опасности производства.'},
+],
+a3:[
+ {k:'one', q:'Эвтрофикация водоёмов вызвана прежде всего', o:['избыточным поступлением соединений азота и фосфора','понижением температуры воды','закислением воды','поступлением радиоактивных веществ'], e:'Азот и фосфор поступают со смывом удобрений, бытовыми стоками и моющими средствами и вызывают бурное развитие водорослей.'},
+ {k:'order', q:'Установите последовательность процессов при эвтрофикации водоёма', o:['поступление в водоём соединений азота и фосфора','бурное размножение водорослей («цветение» воды)','отмирание и разложение водорослей','резкое снижение содержания кислорода в воде','массовая гибель рыбы (замор)'], e:'Разложение отмершей массы водорослей бактериями расходует растворённый кислород, и наступает замор.'},
+ {k:'one', q:'Нефтяная плёнка на поверхности воды опасна прежде всего тем, что', o:['нарушает газообмен между водой и атмосферой и проникновение света','повышает солёность воды','увеличивает содержание кислорода в воде','охлаждает поверхностный слой воды'], e:'Тонкая плёнка нефти покрывает огромные площади, препятствует растворению кислорода, снижает фотосинтез, губит птиц и морских животных.'},
+ {k:'one', q:'Тепловое загрязнение водоёмов вызывают в основном', o:['сбросы подогретых вод ТЭС и АЭС','стоки с сельскохозяйственных полей','бытовые сточные воды','ливневые стоки'], e:'Вода охлаждает агрегаты электростанций и затем сбрасывается в водоёмы нагретой.'},
+ {k:'many', q:'Последствиями теплового загрязнения водоёмов являются', o:['снижение растворимости кислорода в воде','усиление «цветения» воды','гибель холодолюбивых видов рыб','увеличение содержания кислорода в воде','замедление биохимических процессов'], a:[0,1,2], e:'В тёплой воде кислорода растворяется меньше, а обмен веществ организмов и развитие водорослей ускоряются.'},
+ {k:'one', q:'Показатель БПК (биохимическое потребление кислорода) характеризует', o:['содержание в воде органических веществ, разлагаемых микроорганизмами','жёсткость воды','содержание в воде тяжёлых металлов','прозрачность воды'], e:'БПК — количество кислорода, израсходованного микроорганизмами на окисление органики за определённое время (обычно 5 суток, БПК₅). Чем выше БПК, тем грязнее вода.'},
+ {k:'one', q:'Болезнь Минамата в Японии была вызвана отравлением', o:['ртутью','кадмием','свинцом','мышьяком'], e:'Химический завод сбрасывал соединения ртути в залив Минамата. Метилртуть накапливалась в рыбе и по пищевой цепи попадала к людям. Отравление кадмием вызвало болезнь итай-итай.'},
+ {k:'match', q:'Установите соответствие между методом очистки сточных вод и его сущностью', p:[['Механическая','отстаивание, процеживание через решётки, фильтрование'],['Физико-химическая','нейтрализация, коагуляция, окисление'],['Биологическая','разложение органических веществ микроорганизмами активного ила']], e:'Обычно методы применяют последовательно: сначала механическая очистка, затем биологическая, при необходимости физико-химическая доочистка и обеззараживание.'},
+ {k:'one', q:'Главная причина экологической катастрофы Аральского моря', o:['забор воды из Амударьи и Сырдарьи для орошения','загрязнение моря нефтью','глобальное потепление','землетрясения в бассейне моря'], e:'С 1960-х гг. вода рек шла на орошение хлопковых и рисовых полей. Площадь моря сократилась в разы, обнажившееся дно стало источником солевых бурь.'},
+],
+a5:[
+ {k:'order', q:'Расположите классы опасности отходов по порядку, от I к V', o:['чрезвычайно опасные','высокоопасные','умеренно опасные','малоопасные','практически неопасные'], e:'В России отходы делят на пять классов опасности по степени негативного воздействия на окружающую среду: I — чрезвычайно опасные, V — практически неопасные.'},
+ {k:'one', q:'Отработанные ртутьсодержащие лампы относятся к классу опасности', o:['I','III','IV','V'], e:'Ртуть — чрезвычайно опасное вещество, поэтому ртутные лампы и термометры относятся к I классу. Их нельзя выбрасывать с бытовым мусором.'},
+ {k:'order', q:'Расположите способы обращения с отходами по приоритету, от наиболее предпочтительного к наименее', o:['сокращение образования отходов','повторное использование','переработка (рециклинг)','сжигание с получением энергии','захоронение на полигоне'], e:'Это иерархия обращения с отходами. Лучший вариант — не создавать отход, худший — захоронить его.'},
+ {k:'one', q:'Газ, образующийся на полигонах при разложении органических отходов без доступа кислорода', o:['метан','озон','хлор','фреон'], e:'Свалочный газ состоит в основном из метана и CO₂. Метан — сильный парниковый газ и может самовоспламеняться, поэтому его собирают и используют как топливо.'},
+ {k:'one', q:'Главная опасность неправильно устроенного полигона ТКО для водных объектов', o:['фильтрат, проникающий в подземные и поверхностные воды','повышение температуры воды','увеличение прозрачности воды','понижение уровня грунтовых вод'], e:'Фильтрат — жидкость, просачивающаяся через толщу отходов. Он содержит органику, тяжёлые металлы и токсичные вещества, поэтому полигоны устраивают с противофильтрационным экраном.'},
+ {k:'many', q:'Опасность сжигания отходов без современной газоочистки связана с', o:['выбросами диоксинов и фуранов','выбросами тяжёлых металлов','образованием токсичной золы','выделением кислорода','поглощением углекислого газа'], a:[0,1,2], e:'При сжигании пластика и смешанного мусора образуются диоксины — одни из самых токсичных веществ. Зола концентрирует тяжёлые металлы и требует захоронения.'},
+ {k:'one', q:'Примерный срок разложения пластиковой бутылки в природных условиях', o:['сотни лет','несколько недель','2–3 года','10–20 лет'], e:'Пластик почти не разлагается микроорганизмами. Он постепенно распадается на микропластик, который попадает в воду, почву и организмы.'},
+ {k:'one', q:'Отработанные батарейки нельзя выбрасывать вместе с бытовым мусором, потому что', o:['они содержат тяжёлые металлы и едкие вещества, загрязняющие почву и воду','они быстро разлагаются и выделяют кислород','они воспламеняются от солнечного света','они занимают слишком много места на полигоне'], e:'В батарейках есть цинк, марганец, никель, кадмий, литий, иногда ртуть, а также щёлочи и кислоты. Их сдают в специальные пункты приёма.'},
+ {k:'one', q:'Раздельный сбор отходов прежде всего позволяет', o:['увеличить долю переработки и сократить объём захоронения','уже сейчас полностью отказаться от полигонов','уменьшить количество образующихся отходов','сделать все отходы неопасными'], e:'Раздельно собранные бумага, стекло, металл и пластик пригодны для переработки. Само количество отходов при этом не уменьшается: для этого нужно сокращать потребление и упаковку.'},
+],
+};
+
+/* ===== Подготовка данных ===== */
+const QUESTIONS = [], QMAP = {}, TOPIC = {};
+SECTIONS.forEach(s => s.topics.forEach(([id, name]) => { TOPIC[id] = {id, name, sec: s}; }));
+Object.keys(B).forEach(t => B[t].forEach((q, i) => {
+  q.t = t; q.id = t + '-' + (i + 1);
+  if (q.k === 'one' && q.a === undefined) q.a = 0;
+  QUESTIONS.push(q); QMAP[q.id] = q;
+}));
+const AVAIL = Object.keys(B);
+const MODE = {train: 'Тренировка', mistakes: 'Работа над ошибками', exam: 'Экзамен'};
+const HINT = {one: 'Выберите один вариант ответа', many: 'Выберите несколько вариантов ответа', match: 'Установите соответствие', order: 'Установите правильную последовательность'};
+const LETTERS = 'АБВГДЕЖЗ';
+const SEC_PER_Q = 90;
+
+/* ===== Хранилище (только этот браузер) ===== */
+const KEY = 'eco-trainer-v1';
+let store = {};
+try { store = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { store = {}; }
+if (!store || typeof store !== 'object') store = {};
+if (!store.stats || typeof store.stats !== 'object') store.stats = {};
+if (!Array.isArray(store.sel)) store.sel = AVAIL.slice();
+store.sel = store.sel.filter(t => AVAIL.includes(t));
+if (![10, 20, 'all'].includes(store.trainLen)) store.trainLen = 20;
+if (![20, 30].includes(store.examLen)) store.examLen = 20;
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+
+/* ===== Утилиты ===== */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const range = n => Array.from({length: n}, (_, i) => i);
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function plural(n, f) { const a = Math.abs(n) % 100, b = a % 10; if (a > 10 && a < 20) return f[2]; if (b > 1 && b < 5) return f[1]; if (b === 1) return f[0]; return f[2]; }
+const W_Q = ['вопрос', 'вопроса', 'вопросов'], W_T = ['тема', 'темы', 'тем'], W_MIN = ['минута', 'минуты', 'минут'];
+function fmt(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+const reduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const home = $('#home'), quiz = $('#quiz'), result = $('#result');
+let view = 'home', S = null, timerId = null, resetArmed = false, resetT = null, viaKeyboard = false;
+
+/* ===== Подбор вопросов ===== */
+const poolSelected = () => QUESTIONS.filter(q => store.sel.includes(q.t));
+function trainIds() {
+  const st = store.stats, pool = poolSelected();
+  const wrong = shuffle(pool.filter(q => st[q.id] && st[q.id].last === 0));
+  const fresh = shuffle(pool.filter(q => !st[q.id]));
+  const known = pool.filter(q => st[q.id] && st[q.id].last === 1).sort((a, b) => st[a.id].ts - st[b.id].ts);
+  const all = wrong.concat(fresh, known).map(q => q.id);
+  const n = store.trainLen === 'all' ? all.length : Math.min(store.trainLen, all.length);
+  return shuffle(all.slice(0, n));
+}
+function examIds() {
+  const byT = {};
+  poolSelected().forEach(q => (byT[q.t] = byT[q.t] || []).push(q));
+  const topics = shuffle(Object.keys(byT));
+  topics.forEach(t => { byT[t] = shuffle(byT[t]); });
+  const out = [];
+  while (out.length < store.examLen && topics.some(t => byT[t].length)) {
+    for (const t of topics) { if (out.length >= store.examLen) break; const q = byT[t].pop(); if (q) out.push(q.id); }
+  }
+  return shuffle(out);
+}
+const mistakeIds = () => shuffle(QUESTIONS.filter(q => store.stats[q.id] && store.stats[q.id].last === 0).map(q => q.id));
+
+/* ===== Сессия ===== */
+const cur = () => QMAP[S.ids[S.i]];
+function makePerm(q) {
+  if (q.k === 'one' || q.k === 'many') return shuffle(range(q.o.length));
+  if (q.k === 'match') return shuffle(range(q.p.length + (q.x ? q.x.length : 0)));
+  let p; do { p = shuffle(range(q.o.length)); } while (p.every((v, i) => v === i));
+  return p;
+}
+function emptyDraft(q) { return q.k === 'one' ? null : q.k === 'match' ? q.p.map(() => -1) : []; }
+function complete(q, d) {
+  if (q.k === 'one') return d !== null;
+  if (q.k === 'many') return d.length > 0;
+  if (q.k === 'match') return d.every(v => v >= 0);
+  return d.length === q.o.length;
+}
+function correctOf(q) { return q.k === 'one' ? q.a : q.k === 'many' ? q.a : range(q.k === 'match' ? q.p.length : q.o.length); }
+function check(q, d) {
+  if (q.k === 'one') return d === q.a;
+  if (q.k === 'many') { const a = q.a.slice().sort(), b = d.slice().sort(); return a.length === b.length && a.every((v, i) => v === b[i]); }
+  return d.every((v, i) => v === i);
+}
+function record(id, ok) {
+  const s = store.stats[id] || {n: 0, c: 0};
+  s.n++; if (ok) s.c++; s.last = ok ? 1 : 0; s.ts = Date.now();
+  store.stats[id] = s; save();
+}
+function startSession(mode, ids) {
+  if (!ids.length) return;
+  S = {mode, ids, i: 0, perm: ids.map(id => makePerm(QMAP[id])), draft: emptyDraft(QMAP[ids[0]]), phase: 'answer', res: [],
+       startedAt: Date.now(), endedAt: null, deadline: mode === 'exam' ? Date.now() + ids.length * SEC_PER_Q * 1000 : null, timedOut: false};
+  show('quiz');
+}
+function submit() {
+  const q = cur();
+  if (S.phase !== 'answer' || !complete(q, S.draft)) return;
+  const ans = Array.isArray(S.draft) ? S.draft.slice() : S.draft;
+  const ok = check(q, ans);
+  S.res.push({id: q.id, ans, ok});
+  record(q.id, ok);
+  if (S.mode === 'exam') next();
+  else { S.phase = 'feedback'; renderQuiz(); const fb = $('.fb', quiz); if (fb) fb.scrollIntoView({block: 'nearest', behavior: reduced() ? 'auto' : 'smooth'}); }
+}
+function next() {
+  if (S.i + 1 >= S.ids.length) { finish(); return; }
+  S.i++; S.phase = 'answer'; S.draft = emptyDraft(cur());
+  renderQuiz(); window.scrollTo(0, 0);
+}
+function finish() {
+  if (!S) return;
+  if (!S.endedAt) {
+    S.endedAt = Date.now();
+    for (let j = S.res.length; j < S.ids.length && S.mode === 'exam'; j++) S.res.push({id: S.ids[j], ans: null, ok: false});
+  }
+  if (!S.res.length) { S = null; show('home'); return; }
+  show('result');
+}
+
+/* ===== Таймер экзамена ===== */
+function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+function startTimer() { stopTimer(); if (S && S.deadline) { timerId = setInterval(tick, 1000); tick(); } }
+function tick() {
+  if (!S || view !== 'quiz') { stopTimer(); return; }
+  const left = S.deadline - Date.now();
+  if (left <= 0) { S.timedOut = true; stopTimer(); finish(); return; }
+  const el = $('#timer');
+  if (el) { el.textContent = fmt(left); el.classList.toggle('low', left < 60000); }
+}
+
+/* ===== Экраны ===== */
+function show(v) {
+  view = v;
+  home.hidden = v !== 'home'; quiz.hidden = v !== 'quiz'; result.hidden = v !== 'result';
+  if (v === 'quiz') { renderQuiz(); startTimer(); } else stopTimer();
+  if (v === 'home') renderHome();
+  if (v === 'result') renderResult();
+  window.scrollTo(0, 0);
+}
+const seg = (act, curV, opts, label) => `<div class="seg" role="radiogroup" aria-label="${label}">${opts.map(([v, t]) =>
+  `<button type="button" role="radio" aria-checked="${String(v) === String(curV)}" data-act="${act}" data-v="${v}">${t}</button>`).join('')}</div>`;
+
+function renderHome(focusSel) {
+  const st = store.stats;
+  const mastered = QUESTIONS.filter(q => st[q.id] && st[q.id].last === 1).length;
+  let n = 0, c = 0; QUESTIONS.forEach(q => { const s = st[q.id]; if (s) { n += s.n; c += s.c; } });
+  const mistakes = QUESTIONS.filter(q => st[q.id] && st[q.id].last === 0).length;
+  const pool = poolSelected().length;
+  const examN = Math.min(store.examLen, pool);
+  const examMin = Math.round(examN * SEC_PER_Q / 60);
+
+  const tree = SECTIONS.map(s => {
+    const ts = s.topics.map(x => x[0]).filter(t => AVAIL.includes(t));
+    if (!ts.length) {
+      return `<li class="soon"><div class="row sec-row"><span class="box" aria-hidden="true"></span><span class="name"><span class="tag">Раздел</span>${esc(s.name)}</span><span class="stat">скоро</span></div></li>`;
+    }
+    const selN = ts.filter(t => store.sel.includes(t)).length;
+    const topics = s.topics.map(([id, name]) => {
+      if (!AVAIL.includes(id)) return `<li class="soon"><div class="row"><span class="box" aria-hidden="true"></span><span class="name"><span class="tag">Тема</span>${esc(name)}</span><span class="stat">скоро</span></div></li>`;
+      const total = B[id].length, m = B[id].filter(q => st[q.id] && st[q.id].last === 1).length;
+      return `<li><label class="row"><input type="checkbox" data-topic="${id}"${store.sel.includes(id) ? ' checked' : ''}><span class="name"><span class="tag">Тема</span>${esc(name)}</span><span class="stat" title="Освоено ${m} из ${total}"><span class="meter"><i style="width:${m / total * 100}%"></i></span>${m}/${total}</span></label></li>`;
+    }).join('');
+    return `<li><label class="row sec-row"><input type="checkbox" data-sec="${s.id}" data-ind="${selN > 0 && selN < ts.length ? 1 : 0}"${selN === ts.length ? ' checked' : ''}><span class="name"><span class="tag">Раздел</span>${esc(s.name)}</span><span class="stat">${selN}/${ts.length}</span></label><ul>${topics}</ul></li>`;
+  }).join('');
+
+  home.innerHTML = `
+    <header class="masthead">
+      <p class="eyebrow">Подготовка к тестированию i-exam</p>
+      <h1>Тренажёр по экологии</h1>
+      <p class="lede">${QUESTIONS.length} ${plural(QUESTIONS.length, W_Q)} по ${AVAIL.length} темам в форматах заданий i-exam: один ответ, несколько ответов, соответствие и последовательность.</p>
+    </header>
+    <section class="summary" aria-label="Ваш прогресс">
+      <div><span class="k">Освоено</span><span class="v">${mastered}<small>из ${QUESTIONS.length}</small></span></div>
+      <div><span class="k">Точность</span><span class="v">${n ? Math.round(c * 100 / n) + '%' : '—'}</span></div>
+      <div><span class="k">К разбору</span><span class="v">${mistakes}</span></div>
+    </section>
+    <section class="modes" aria-label="Режимы">
+      <article class="mode">
+        <div class="mode-main"><h3>Тренировка</h3><p>Пояснение после каждого ответа. Сначала идут вопросы с ошибками и новые.</p></div>
+        <div class="mode-ctl">${seg('train-len', store.trainLen, [[10, '10'], [20, '20'], ['all', 'Все']], 'Количество вопросов')}<button type="button" class="btn primary" data-act="start-train"${pool ? '' : ' disabled'}>Начать</button></div>
+      </article>
+      <article class="mode">
+        <div class="mode-main"><h3>Работа над ошибками</h3><p>${mistakes ? `${mistakes} ${plural(mistakes, W_Q)} с ошибкой в последней попытке, из всех тем.` : 'Здесь появятся вопросы, в которых вы ошиблись.'}</p></div>
+        <div class="mode-ctl"><button type="button" class="btn primary" data-act="start-mistakes"${mistakes ? '' : ' disabled'}>Начать</button></div>
+      </article>
+      <article class="mode">
+        <div class="mode-main"><h3>Экзамен</h3><p>${pool ? `${examN} ${plural(examN, W_Q)}, ${examMin} ${plural(examMin, W_MIN)}, без подсказок. Разбор ошибок в конце.` : 'Вопросы поровну из выбранных тем, с таймером.'}</p></div>
+        <div class="mode-ctl">${seg('exam-len', store.examLen, [[20, '20'], [30, '30']], 'Количество вопросов')}<button type="button" class="btn primary" data-act="start-exam"${pool ? '' : ' disabled'}>Начать</button></div>
+      </article>
+      ${pool ? '' : '<p class="notice">Выберите хотя бы одну тему ниже, чтобы начать тренировку или экзамен.</p>'}
+    </section>
+    <section class="topics" aria-label="Темы">
+      <div class="topics-head">
+        <h2 class="section-title">Темы</h2>
+        <div class="topics-actions"><button type="button" class="link" data-act="sel-all">Выбрать все</button><button type="button" class="link" data-act="sel-none">Снять все</button></div>
+      </div>
+      <p class="muted small">Выбрано ${store.sel.length} ${plural(store.sel.length, W_T)}, ${pool} ${plural(pool, W_Q)}. Тренировка и экзамен берут вопросы только из выбранных тем.</p>
+      <ul class="tree">${tree}</ul>
+    </section>
+    <footer class="foot">
+      <p>Прогресс хранится только в этом браузере.</p>
+      <button type="button" class="link danger" data-act="reset">${resetArmed ? 'Нажмите ещё раз, чтобы стереть прогресс' : 'Сбросить прогресс'}</button>
+    </footer>`;
+  home.querySelectorAll('[data-sec]').forEach(el => { el.indeterminate = el.dataset.ind === '1'; });
+  if (focusSel) { const el = $(focusSel, home); if (el) el.focus({preventScroll: true}); }
+  persist();
+}
+
+function optsHtml(q, perm, d, fb) {
+  const multi = q.k === 'many', correct = multi ? q.a : [q.a];
+  return `<div class="opts" role="${multi ? 'group' : 'radiogroup'}" aria-label="Варианты ответа">${perm.map((oi, pos) => {
+    const on = multi ? d.includes(oi) : d === oi;
+    let cls = 'opt opt-' + q.k + (on ? ' is-chosen' : ''), extra = '';
+    if (fb) {
+      if (correct.includes(oi)) { cls += ' is-correct'; if (!on && multi) { cls += ' is-missed'; extra = '<span class="miss-tag">не отмечен</span>'; } }
+      else if (on) cls += ' is-wrong'; else cls += ' is-dim';
+    }
+    return `<button type="button" class="${cls}" data-act="pick" data-o="${oi}" role="${multi ? 'checkbox' : 'radio'}" aria-checked="${on}"${fb ? ' disabled' : ''}><span class="mark" aria-hidden="true"></span><span class="opt-text">${esc(q.o[oi])}</span>${extra || `<kbd>${pos + 1}</kbd>`}</button>`;
+  }).join('')}</div>`;
+}
+function matchHtml(q, perm, d, fb) {
+  const pool = q.p.map(p => p[1]).concat(q.x || []);
+  return `<ol class="m-legend" aria-label="Варианты ответа">${perm.map((ri, pos) => `<li><b>${LETTERS[pos]}</b><span>${esc(pool[ri])}</span></li>`).join('')}</ol>
+  <div class="m-rows">${q.p.map((p, li) => {
+    const sel = d[li];
+    const rowCls = fb ? (sel === li ? ' is-correct' : ' is-wrong') : '';
+    return `<div class="m-row${rowCls}"><div class="m-left"><span class="num">${li + 1}</span><span>${esc(p[0])}</span></div>
+      <div class="chips" role="radiogroup" aria-label="Ответ для пункта ${li + 1}">${perm.map((ri, pos) => {
+        const on = sel === ri; let c = on ? ' on' : '';
+        if (fb) { if (ri === li) c += ' right'; else if (on) c += ' bad'; }
+        return `<button type="button" class="chip${c}" data-act="match" data-l="${li}" data-r="${ri}" role="radio" aria-checked="${on}" aria-label="${LETTERS[pos]}: ${esc(pool[ri])}"${fb ? ' disabled' : ''}>${LETTERS[pos]}</button>`;
+      }).join('')}</div></div>`;
+  }).join('')}</div>`;
+}
+function orderHtml(q, perm, d, fb) {
+  const rest = perm.filter(oi => !d.includes(oi));
+  const slots = range(q.o.length).map(pos => {
+    const oi = d[pos];
+    if (oi === undefined) return `<li class="slot empty"><span class="num">${pos + 1}</span><span>${pos === d.length ? 'Выберите вариант ниже' : ''}</span></li>`;
+    const c = fb ? (oi === pos ? ' is-correct' : ' is-wrong') : '';
+    return `<li class="slot${c}"><button type="button" data-act="ord-rm" data-pos="${pos}"${fb ? ' disabled' : ''} aria-label="Убрать: ${esc(q.o[oi])}"><span class="num">${pos + 1}</span><span class="opt-text">${esc(q.o[oi])}</span>${fb ? '' : '<span class="x" aria-hidden="true">×</span>'}</button></li>`;
+  }).join('');
+  const poolHtml = fb ? '' : `<p class="ord-label">Варианты</p><div class="ord-pool">${rest.length ? rest.map((oi, k) =>
+    `<button type="button" class="opt" data-act="ord-add" data-o="${oi}"><span class="opt-text">${esc(q.o[oi])}</span><kbd>${k + 1}</kbd></button>`).join('') : '<p class="muted small">Все варианты расставлены. Нажмите на пункт выше, чтобы убрать его.</p>'}</div>`;
+  return `<p class="ord-label">Ваша последовательность</p><ol class="ord-seq">${slots}</ol>${poolHtml}`;
+}
+
+function renderQuiz(focusSel) {
+  const q = cur(), perm = S.perm[S.i], fb = S.phase === 'feedback', d = S.draft, total = S.ids.length;
+  const tp = TOPIC[q.t], exam = S.mode === 'exam', isLast = S.i + 1 >= total;
+  const done = S.i + (fb ? 1 : 0);
+  const body = (q.k === 'one' || q.k === 'many') ? optsHtml(q, perm, d, fb) : q.k === 'match' ? matchHtml(q, perm, d, fb) : orderHtml(q, perm, d, fb);
+  let fbHtml = '';
+  if (fb) {
+    const r = S.res[S.res.length - 1];
+    fbHtml = `<div class="fb ${r.ok ? 'ok' : 'bad'}" role="status"><p class="fb-head">${r.ok ? '✓ Верно' : '✕ Неверно'}</p>${!r.ok && q.k === 'order' ? `<p>Правильный порядок:</p><ol>${q.o.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}<p>${esc(q.e)}</p></div>`;
+  }
+  const left = exam ? S.deadline - Date.now() : 0;
+  quiz.innerHTML = `
+    <div class="qbar">
+      <div class="qbar-row">
+        ${exam ? '<button type="button" class="link" data-act="finish">Завершить</button>' : '<button type="button" class="link" data-act="exit">← К темам</button>'}
+        <span class="eyebrow">${MODE[S.mode]}</span>
+        <span class="qbar-right"><span class="count">${S.i + 1} / ${total}</span>${exam ? `<span id="timer" class="timer${left < 60000 ? ' low' : ''}" aria-label="Осталось времени">${fmt(left)}</span>` : ''}</span>
+      </div>
+      <div class="progress" role="progressbar" aria-label="Пройдено" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><i style="width:${done / total * 100}%"></i></div>
+    </div>
+    <article class="card">
+      <div class="q-meta"><p class="eyebrow">${esc(tp.sec.name)} · ${esc(tp.name)}</p><p class="hint">${HINT[q.k]}</p></div>
+      <h2 class="q-text">${esc(q.q)}</h2>
+      ${body}
+      ${fbHtml}
+    </article>
+    <p class="keys muted small">Клавиши: 1–9 — выбор варианта, Enter — ответить и перейти дальше</p>
+    <div class="actions">
+      ${fb ? `<button type="button" class="btn primary" data-act="next">${isLast ? 'Показать итог' : 'Дальше'}</button>`
+           : `<button type="button" class="btn primary" data-act="submit"${complete(q, d) ? '' : ' disabled'}>${exam && isLast ? 'Ответить и завершить' : 'Ответить'}</button>`}
+    </div>`;
+  if (focusSel && viaKeyboard) { const el = $(focusSel, quiz); if (el && !el.disabled) el.focus({preventScroll: true}); }
+  persist();
+}
+
+function ansHtml(q, ans) {
+  if (ans === null || ans === undefined || (Array.isArray(ans) && !ans.length)) return '<em>нет ответа</em>';
+  if (q.k === 'one') return esc(q.o[ans]);
+  if (q.k === 'many') return `<ul>${ans.map(i => `<li>${esc(q.o[i])}</li>`).join('')}</ul>`;
+  if (q.k === 'match') { const pool = q.p.map(p => p[1]).concat(q.x || []); return `<ul>${q.p.map((p, li) => `<li>${esc(p[0])} → ${ans[li] >= 0 ? esc(pool[ans[li]]) : '—'}</li>`).join('')}</ul>`; }
+  return `<ol>${ans.map(i => `<li>${esc(q.o[i])}</li>`).join('')}</ol>`;
+}
+function renderResult() {
+  const res = S.res, total = res.length, ok = res.filter(r => r.ok).length, pct = total ? Math.round(ok * 100 / total) : 0;
+  const byT = {};
+  res.forEach(r => { const t = QMAP[r.id].t; const o = byT[t] || (byT[t] = {ok: 0, n: 0}); o.n++; if (r.ok) o.ok++; });
+  const topics = Object.keys(byT).sort((a, b) => AVAIL.indexOf(a) - AVAIL.indexOf(b));
+  const wrong = res.filter(r => !r.ok);
+  const dur = S.endedAt ? fmt(S.endedAt - S.startedAt) : '';
+  result.innerHTML = `
+    <header class="res-head">
+      <p class="eyebrow">${MODE[S.mode]} · итог</p>
+      <div class="score"><span class="big">${ok}</span><span class="of">из ${total} верно</span></div>
+      <p class="muted">${pct}% правильных ответов${dur ? ` · время ${dur}` : ''}${S.timedOut ? ' · время вышло' : ''}</p>
+    </header>
+    <section class="block"><h2 class="section-title">По темам</h2>
+      <div class="t-rows">${topics.map(t => { const o = byT[t], p = o.ok / o.n; return `<div class="t-row"><span class="name">${esc(TOPIC[t].name)}</span><span class="bar"><i class="${p < 0.5 ? 'low' : ''}" style="width:${p * 100}%"></i></span><span class="n">${o.ok}/${o.n}</span></div>`; }).join('')}</div>
+    </section>
+    <section class="block"><h2 class="section-title">${wrong.length ? `Ошибки · ${wrong.length}` : 'Ошибок нет'}</h2>
+      ${wrong.length ? `<div class="errs">${wrong.map(r => { const q = QMAP[r.id]; return `<details class="err"><summary><span>${esc(q.q)}</span></summary><div class="err-body"><div><p class="lbl">Ваш ответ</p><div class="yours">${ansHtml(q, r.ans)}</div></div><div><p class="lbl">Правильный ответ</p><div class="right-ans">${ansHtml(q, correctOf(q))}</div></div><p>${esc(q.e)}</p></div></details>`; }).join('')}</div>`
+        : '<p class="muted">Все ответы верные. Можно добавить темы или перейти к экзамену.</p>'}
+    </section>
+    <div class="actions">
+      ${wrong.length ? '<button type="button" class="btn ghost" data-act="retry">Повторить ошибки</button>' : ''}
+      <button type="button" class="btn primary" data-act="home">К темам</button>
+    </div>`;
+  persist();
+}
+
+/* ===== События ===== */
+document.addEventListener('keydown', () => { viaKeyboard = true; }, true);
+document.addEventListener('pointerdown', () => { viaKeyboard = false; }, true);
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]');
+  if (!b || b.disabled) return;
+  const a = b.dataset.act;
+  if (a === 'train-len') { store.trainLen = b.dataset.v === 'all' ? 'all' : +b.dataset.v; save(); renderHome(`[data-act="train-len"][data-v="${b.dataset.v}"]`); }
+  else if (a === 'exam-len') { store.examLen = +b.dataset.v; save(); renderHome(`[data-act="exam-len"][data-v="${b.dataset.v}"]`); }
+  else if (a === 'start-train') startSession('train', trainIds());
+  else if (a === 'start-mistakes') startSession('mistakes', mistakeIds());
+  else if (a === 'start-exam') startSession('exam', examIds());
+  else if (a === 'sel-all') { store.sel = AVAIL.slice(); save(); renderHome('[data-act="sel-all"]'); }
+  else if (a === 'sel-none') { store.sel = []; save(); renderHome('[data-act="sel-none"]'); }
+  else if (a === 'reset') {
+    clearTimeout(resetT);
+    if (!resetArmed) { resetArmed = true; resetT = setTimeout(() => { resetArmed = false; if (view === 'home') renderHome(); }, 4000); }
+    else { resetArmed = false; store.stats = {}; save(); }
+    renderHome('[data-act="reset"]');
+  }
+  else if (a === 'pick' && S && S.phase === 'answer') {
+    const q = cur(), oi = +b.dataset.o;
+    if (q.k === 'one') S.draft = oi; else { const k = S.draft.indexOf(oi); if (k >= 0) S.draft.splice(k, 1); else S.draft.push(oi); }
+    renderQuiz(`[data-act="pick"][data-o="${oi}"]`);
+  }
+  else if (a === 'match' && S && S.phase === 'answer') {
+    const li = +b.dataset.l, ri = +b.dataset.r, d = S.draft;
+    if (d[li] === ri) d[li] = -1; else { d.forEach((v, k) => { if (v === ri) d[k] = -1; }); d[li] = ri; }
+    renderQuiz(`[data-act="match"][data-l="${li}"][data-r="${ri}"]`);
+  }
+  else if (a === 'ord-add' && S && S.phase === 'answer') { S.draft.push(+b.dataset.o); renderQuiz('.ord-pool .opt'); }
+  else if (a === 'ord-rm' && S && S.phase === 'answer') { S.draft.splice(+b.dataset.pos, 1); renderQuiz('.ord-pool .opt'); }
+  else if (a === 'submit') submit();
+  else if (a === 'next') next();
+  else if (a === 'exit') { S = null; show('home'); }
+  else if (a === 'finish') {
+    if (b.dataset.armed) finish();
+    else { b.dataset.armed = '1'; b.textContent = 'Точно завершить?'; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = 'Завершить'; } }, 3000); }
+  }
+  else if (a === 'retry') startSession('mistakes', shuffle(S.res.filter(r => !r.ok).map(r => r.id)));
+  else if (a === 'home') { S = null; show('home'); }
+});
+
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.topic) {
+    const t = el.dataset.topic;
+    store.sel = el.checked ? Array.from(new Set(store.sel.concat(t))) : store.sel.filter(x => x !== t);
+    save(); renderHome(`[data-topic="${t}"]`);
+  } else if (el.dataset.sec) {
+    const sec = SECTIONS.find(s => s.id === el.dataset.sec);
+    const ts = sec.topics.map(x => x[0]).filter(t => AVAIL.includes(t));
+    store.sel = el.checked ? Array.from(new Set(store.sel.concat(ts))) : store.sel.filter(x => !ts.includes(x));
+    save(); renderHome(`[data-sec="${sec.id}"]`);
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (view !== 'quiz' || !S || e.ctrlKey || e.metaKey || e.altKey) return;
+  const q = cur();
+  if (/^[1-9]$/.test(e.key) && S.phase === 'answer') {
+    const n = +e.key - 1, perm = S.perm[S.i];
+    if ((q.k === 'one' || q.k === 'many') && n < perm.length) {
+      e.preventDefault(); const oi = perm[n];
+      if (q.k === 'one') S.draft = oi; else { const k = S.draft.indexOf(oi); if (k >= 0) S.draft.splice(k, 1); else S.draft.push(oi); }
+      renderQuiz();
+    } else if (q.k === 'order') {
+      const rest = perm.filter(oi => !S.draft.includes(oi));
+      if (n < rest.length) { e.preventDefault(); S.draft.push(rest[n]); renderQuiz(); }
+    }
+  } else if (e.key === 'Enter') {
+    const tag = e.target.tagName;
+    if (tag === 'BUTTON' || tag === 'A' || tag === 'INPUT' || tag === 'SUMMARY') return;
+    e.preventDefault();
+    if (S.phase === 'answer') submit(); else next();
+  }
+});
+
+/* ===== Запуск. Незаконченная сессия переживает перезагрузку вкладки (sessionStorage) ===== */
+const SKEY = 'eco-trainer-session';
+function persist() { try { sessionStorage.setItem(SKEY, JSON.stringify(S && view !== 'home' ? {view, S} : null)); } catch (e) {} }
+function boot() {
+  let data = null;
+  try { data = JSON.parse(sessionStorage.getItem(SKEY)); } catch (e) { data = null; }
+  if (data && data.S && Array.isArray(data.S.ids) && data.S.ids.length && data.S.ids.every(id => QMAP[id]) && (data.view === 'quiz' || data.view === 'result')) {
+    S = data.S; show(data.view);
+  } else show('home');
+}
+boot();
+</script>
+</body>
+</html>
